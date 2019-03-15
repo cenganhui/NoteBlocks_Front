@@ -1,5 +1,6 @@
 package geishaproject.demonote.module.picture;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -7,7 +8,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.os.StrictMode;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import java.io.BufferedOutputStream;
@@ -38,6 +42,18 @@ public class PhotoTool extends Activity{
      * 构造函数
      */
     public PhotoTool(Data data){ this.data = data; }
+
+    /**
+     * 初始化拍照模块
+     */
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
+    public static void initPhoto() {
+        // android 7.0系统解决拍照的问题
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+        builder.detectFileUriExposure();
+    }
     /**
      * 加载data数据
      */
@@ -258,6 +274,7 @@ public class PhotoTool extends Activity{
         //当检查完后才真正保存
         Components.mPhotoTool.saveToData();
     }
+
 
     /**
      * 为斌哥存bug----text view
