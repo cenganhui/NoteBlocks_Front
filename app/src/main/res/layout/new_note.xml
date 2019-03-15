@@ -60,18 +60,18 @@
 
                             />
 
-                        <View  android:layout_height="1dp"
-                            android:layout_marginTop="14dp"
+                        <View  android:layout_height="2dp"
+                            android:layout_marginTop="8dp"
                             android:layout_width="match_parent"
                             android:layout_marginLeft="7dp"
                             android:layout_marginRight="6dp"
                             android:layout_gravity="left"
-                            android:background="#404040"
+                            android:background="#bfbfbf"
                             />
 
                         <EditText
 
-
+                            android:layout_marginTop="8dp"
                             android:id="@+id/content"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -82,6 +82,7 @@
                             android:textColor="#505050"
                             android:textSize="18dp"
                             android:lineSpacingExtra="5dp"
+                            android:paddingBottom="200dp"
                             />
                     </LinearLayout>
 

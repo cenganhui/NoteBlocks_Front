@@ -122,7 +122,6 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
         Components.mEmTvBtn = (AudioRecordButton) findViewById(R.id.em_tv_btn);
     }
 
-
     /**
      * 添加活动的所有监听事件，在这里绑定点击事件函数
      */
@@ -137,7 +136,6 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
         Audio.addAudioListener(); //添加录音点击事件
     }
 
-
     /**
      * 初始化数据模型
      */
@@ -147,7 +145,6 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
         if (idsFlag != 0) {    //根据data的ids判断是新建还是读写，如果是读写，则显示对应数据
             Components.data = DataDao.GetDataByIds(idsFlag);
             Components.mPhotoTool = new PhotoTool(Components.data);
-
         }else{                       //如果是新建，则创建一个新的数据模型
             Components.data=new Data(0,"","","","","");
             Components.mPhotoTool = new PhotoTool(Components.data);
@@ -171,7 +168,6 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
         MediaManager.release();//保证在退出该页面时，终止语音播放
         super.onPause();
     }
-
 
     /**
      *  相机拍完照之后的回调
@@ -212,7 +208,6 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
             }
         }
     }
-
 
     /**
      * 添加闹钟函数
@@ -328,7 +323,7 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
     }
 
     /**
-     * 菜单选项创建
+     * 右上角菜单选项创建
      * @param menu
      * @return
      */
@@ -337,7 +332,6 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
         getMenuInflater().inflate(R.menu.new_lo,menu);
         return true;
     }
-
 
     /**
      * 响应右上角菜单的点击事件
