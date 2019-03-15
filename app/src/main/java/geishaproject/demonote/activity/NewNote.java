@@ -61,6 +61,7 @@ import java.util.Random;
 
 
 import geishaproject.demonote.module.audio.AlarmReceiver;
+import geishaproject.demonote.module.richtext.RichText;
 import geishaproject.demonote.ui.Components;
 import geishaproject.demonote.utils.PublicContext;
 import geishaproject.demonote.R;
@@ -74,6 +75,7 @@ import geishaproject.demonote.module.picture.PhotoTool;
 import geishaproject.demonote.module.permission.PermissionHelper;
 
 import static android.app.AlertDialog.THEME_HOLO_LIGHT;
+import static geishaproject.demonote.module.richtext.RichText.initifphotohave;
 
 
 public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPreDrawListener {
@@ -102,6 +104,7 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
         initPhoto(); //初始化拍照功能模块
         initDataModel(); //初始化数据模型
         initEditText();  //初始化文本编辑框
+        initifphotohave(); //初始化富文本显示
         Log.d("initFinish","width:"+Components.ed_content.getWidth()+",text: "+Components.ed_content.getText());
     }
 
@@ -147,57 +150,8 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
         Components.ed_title.setText(Components.data.getTitle());  //获取对应的值
         Components.mPhotoTool.doclear();
         Components.mPhotoTool.readyAdress();
-        initifphotohave();
     }
 
-    /**
-     * 初始化有图片的文字/没图片处理在最下面的else
-     */
-    private void initifphotohave() {
-
-        //用下面函数可以将控件宽高提前拿到
-        Components.ed_content.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-
-            @Override
-            public void onGlobalLayout() {
-                // TODO Auto-generated method stub
-                Components.ed_content.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                Components.mPhotoTool.addsize(Components.ed_content.getWidth(),Components.ed_content.getHeight());
-                String world = Components.data.getContent();
-                String now = world;         //还有的文本
-                //全部文本
-                int startindex=0;      //要替换图片的位置
-                int endindex=0;        //要替换图片的位置
-                int i=0;               //变量
-                Bitmap bitmap= null;
-                Log.d(TAG,"ed text ;:"+ Components.mPhotoTool.BitmapAdressSize());
-                if (Components.mPhotoTool.BitmapAdressSize()>0){
-                    for (i=0; i<Components.mPhotoTool.BitmapAdressSize();i++) {
-                        //数据定义
-                        Log.d(TAG, "要切的文本" + Components.mPhotoTool.GetBitmapNmae(i));
-                        String show;        //要放上去的文本
-                        //找到要替换的特殊字符位置
-                        endindex = now.indexOf(Components.mPhotoTool.GetBitmapNmae(i));
-                        //切割子文本
-                        show = now.substring(0, endindex);
-                        now = now.substring(endindex + Components.mPhotoTool.GetBitmapNmae(i).length());
-                        //输出文本
-                        Components.ed_content.append(show);
-                        //输出图片，GetSpannableString 富文本操作
-                        bitmap = Components.mPhotoTool.getBitmapForAdress(Components.mPhotoTool.GetBitmapNmae(i));
-                        SpannableString spannableString = GetSpannableString(bitmap, Components.mPhotoTool.GetBitmapNmae(i));
-                        Components.ed_content.append(spannableString);
-                    }
-                    if(i == Components.mPhotoTool.BitmapAdressSize())
-                        Components.ed_content.append(now);
-                }
-                else
-                    Components.ed_content.setText(Components.data.getContent());
-
-            }
-        });
-
-    }
 
 
     /*  录音  */
@@ -338,7 +292,7 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
                     Bitmap imgBitmap = PhotoTool.imageScale(result,Components.ed_content.getWidth(),Math.round(result.getHeight()*((float) Components.ed_content.getWidth()/result.getWidth())));
                     //保存图片
                     Components.mPhotoTool.saveImg(imgBitmap,this);
-                    SpannableString spannableString = GetSpannableString(imgBitmap,Components.mPhotoTool.GetBitmapNmae(Components.mPhotoTool.BitmapAdressSize()-1));
+                    SpannableString spannableString = RichText.GetSpannableString(imgBitmap,Components.mPhotoTool.GetBitmapNmae(Components.mPhotoTool.BitmapAdressSize()-1));
                     Components.ed_content.append(spannableString);
                 }
             }else if (resultCode == Activity.RESULT_CANCELED) {
@@ -348,19 +302,6 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
         }
     }
 
-    /**
-     * 富文本自定义函数
-     */
-    public SpannableString GetSpannableString(Bitmap bitmap,String specialchar){
-        SpannableString spannableString = new SpannableString(specialchar);
-        Log.d(TAG,"diaonma"+Components.ed_content.getWidth()+"////"+Components.ed_content.getHeight());
-       /* BitmapFactory.Options opts = new BitmapFactory.Options();
-        opts.inSampleSize = 2;*/
-        Log.d(TAG,"大小为（m）："+bitmap.getByteCount() / 1024 / 1024+"宽度为" + bitmap.getWidth() + "高度为" + bitmap.getHeight());
-        ImageSpan imgSpan = new ImageSpan(PublicContext.getContext(),bitmap, DynamicDrawableSpan.ALIGN_BASELINE);
-        spannableString.setSpan(imgSpan, 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        return spannableString;
-    }
 
     /*  闹钟部分  */
 
@@ -455,14 +396,16 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd   HH:mm");//编辑便签的时间，格式化
         Date date = new Date(System.currentTimeMillis());
         String time = simpleDateFormat.format(date);
+
         //先将数据库内setPicturePath置空，在saveimg中才将正确的留下
         Components.data.setPicturePath("");
         Components.data.setTimes(time);    //给当前data更新数据,如果有录音和拍照数据，应该在对应的过程中调用data.setXXX
         Components.data.setTitle(Components.ed_title.getText().toString());
         Components.data.setContent(Components.ed_content.getText().toString());
+
         //才将图片保存进入数据库
-        check();
-        //
+        PhotoTool.check();
+
         if(Components.data.getIds()!=0){ //根据data修改数据库
             DataDao.ChangeData(Components.data);
             Intent intent=new Intent(NewNote.this,MainActivity.class);
@@ -474,42 +417,6 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
             startActivity(intent);
             NewNote.this.finish();
         }
-    }
-
-    /**
-     * 才将图片保存进入数据库
-     */
-    private void check() {
-        String world = Components.data.getContent();
-        String now = world;         //还有的文本
-        int startindex=0;      //要替换图片的位置
-        int endindex=0;        //要替换图片的位置
-        int i=0;               //变量
-        int temp = 0;
-        Log.d(TAG,""+Components.mPhotoTool.BitmapAdressSize());
-        if (Components.mPhotoTool.BitmapAdressSize()>0){
-            for (i=0; i<Components.mPhotoTool.BitmapAdressSize();i++) {
-                //数据定义
-                String show;        //要放上去的文本
-                //找到要替换的特殊字符位置
-                Log.d(TAG,"dizhi:"+Components.mPhotoTool.GetBitmapNmae(i));
-                endindex = now.indexOf(Components.mPhotoTool.GetBitmapNmae(i));
-                if(endindex == -1){
-                    //删除实际文件
-                    Components.mPhotoTool.deleteBitmapForAdress(Components.mPhotoTool.GetBitmapNmae(i-temp));
-                    //删除变量内容
-                    Components.mPhotoTool.delete(i-temp);
-                    temp++;
-                }else{
-                    //切割子文本
-                    show = now.substring(0, endindex);
-                    now = now.substring(endindex + Components.mPhotoTool.GetBitmapNmae(i).length());
-                    //输出文本
-                }
-            }
-        }
-        //当检查完后才真正保存
-        Components.mPhotoTool.saveToData();
     }
 
 

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import geishaproject.demonote.model.Data;
+import geishaproject.demonote.ui.Components;
 
 public class PhotoTool extends Activity{
     private static final String TAG = "PhotoTool";
@@ -222,6 +223,41 @@ public class PhotoTool extends Activity{
         }
     }
 
+    /**
+     * 才将图片保存进入数据库
+     */
+    public static void check() {
+        String world = Components.data.getContent();
+        String now = world;         //还有的文本
+        int startindex=0;      //要替换图片的位置
+        int endindex=0;        //要替换图片的位置
+        int i=0;               //变量
+        int temp = 0;
+        Log.d(TAG,""+Components.mPhotoTool.BitmapAdressSize());
+        if (Components.mPhotoTool.BitmapAdressSize()>0){
+            for (i=0; i<Components.mPhotoTool.BitmapAdressSize();i++) {
+                //数据定义
+                String show;        //要放上去的文本
+                //找到要替换的特殊字符位置
+                Log.d(TAG,"dizhi:"+Components.mPhotoTool.GetBitmapNmae(i));
+                endindex = now.indexOf(Components.mPhotoTool.GetBitmapNmae(i));
+                if(endindex == -1){
+                    //删除实际文件
+                    Components.mPhotoTool.deleteBitmapForAdress(Components.mPhotoTool.GetBitmapNmae(i-temp));
+                    //删除变量内容
+                    Components.mPhotoTool.delete(i-temp);
+                    temp++;
+                }else{
+                    //切割子文本
+                    show = now.substring(0, endindex);
+                    now = now.substring(endindex + Components.mPhotoTool.GetBitmapNmae(i).length());
+                    //输出文本
+                }
+            }
+        }
+        //当检查完后才真正保存
+        Components.mPhotoTool.saveToData();
+    }
 
     /**
      * 为斌哥存bug----text view
