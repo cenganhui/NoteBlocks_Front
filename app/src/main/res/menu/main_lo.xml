@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+
+        android:id="@+id/menu_newnote"
+
+        android:title="@string/menu_newnote"
+
+        />
+    <item
+
+        android:id="@+id/menu_export"
+
+        android:title="导出"
+
+        />
+    <item
+
+        android:id="@+id/menu_import"
+
+        android:title="导入"
+
+        />
+    <item
+
+        android:id="@+id/menu_exit"
+
+        android:title="@string/menu_exit"
+
+        />
+
+</menu>
