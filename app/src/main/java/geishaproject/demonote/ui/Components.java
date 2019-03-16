@@ -16,7 +16,7 @@ import geishaproject.demonote.module.audio.manager.AudioRecordButton;
 import geishaproject.demonote.module.permission.PermissionHelper;
 import geishaproject.demonote.module.picture.PhotoTool;
 
-public class Components {
+public class    Components {
     public static EditText ed_title;    //标题和内容文本框
     public static EditText ed_content;
     public static FloatingActionButton floatingActionButton;  //右下角按钮

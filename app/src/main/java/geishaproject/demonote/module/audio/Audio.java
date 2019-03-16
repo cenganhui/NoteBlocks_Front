@@ -1,16 +1,22 @@
 package geishaproject.demonote.module.audio;
 
 import android.Manifest;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaPlayer;
+import android.text.SpannableString;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import java.io.IOException;
 
+import geishaproject.demonote.R;
 import geishaproject.demonote.activity.NewNote;
 import geishaproject.demonote.module.audio.manager.AudioRecordButton;
 import geishaproject.demonote.module.permission.PermissionHelper;
+import geishaproject.demonote.module.richtext.RichText;
 import geishaproject.demonote.ui.Components;
 import geishaproject.demonote.utils.PublicContext;
 
@@ -22,6 +28,7 @@ public class Audio {
     public static void initAudio() {
         Components.player = new MediaPlayer();   //实例化录音控件
     }
+    RichText mRichText;
     /**
      * 播放录音
      */
@@ -78,6 +85,12 @@ public class Audio {
                                 recordModel.setPlayed(false);
                                 Components.mRecords = recordModel;
                                 String newAudioPath =Components.data.getAudioPath()+Components.mRecords.getPath()+"?";
+                                //输出录音小标识到文本***********
+                                Bitmap bitmap= BitmapFactory.decodeResource(PublicContext.getContext().getResources(), R.drawable.record);
+                                //Log.e(TAG,"addAudioListener :"+mRecords.getPath() );
+                                SpannableString spannableString = RichText.GetSpannableString(bitmap, Components.mRecords.getPath());
+                                Components.ed_content.append(spannableString);
+                                Components.mPhotoTool.saverecordadress(Components.mRecords.getPath());
                                 //拼接的路径重新存入data中
                                 Components.data.setAudioPath(newAudioPath);
                                 Components.data.cutAudioPathArr();

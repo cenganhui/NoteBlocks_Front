@@ -302,13 +302,14 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
 
         //先将数据库内setPicturePath置空，在saveimg中才将正确的留下
         Components.data.setPicturePath("");
+        Components.data.setAudioPath("");
         Components.data.setTimes(time);    //给当前data更新数据,如果有录音和拍照数据，应该在对应的过程中调用data.setXXX
         Components.data.setTitle(Components.ed_title.getText().toString());
         Components.data.setContent(Components.ed_content.getText().toString());
 
         //才将图片保存进入数据库
         PhotoTool.check();
-
+        Components.mPhotoTool.showwwww();
         if(Components.data.getIds()!=0){ //根据data修改数据库
             DataDao.ChangeData(Components.data);
             Intent intent=new Intent(NewNote.this,MainActivity.class);
