@@ -69,7 +69,7 @@ public class Backup {
 
 
     /**
-     * 读取oteBlocks.json文件并将数据保存到DataDao和数据库中
+     * 读取NoteBlocks.json文件并将数据保存到DataDao和数据库中
      * @param JsonFilePath
      */
     public static void readJsonFile(String JsonFilePath){
@@ -108,6 +108,7 @@ public class Backup {
                 }
                 jsonReader.endObject();
                 data.cutPicturePath();
+                data.cutAudioPathArr();
                 boolean flag = DataDao.AddNewData(data);
                 //Log.d("testDataDao*1","data： "+data);
             }
