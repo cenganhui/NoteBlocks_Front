@@ -90,6 +90,7 @@ public class PhotoTool extends Activity{
     public String GetBitmapNmae(int i) {
         return pictureName.get(i);
     }
+
     public String GetRecordNmae(int i) {
         return musicName.get(i);
     }

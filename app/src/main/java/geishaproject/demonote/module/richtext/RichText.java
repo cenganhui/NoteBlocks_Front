@@ -27,6 +27,7 @@ import geishaproject.demonote.R;
 import geishaproject.demonote.ui.Components;
 import geishaproject.demonote.utils.PublicContext;
 
+
 public class RichText {
     private static final String TAG = "RichText";//Log调试
     private static MediaPlayer player = new MediaPlayer();
@@ -35,7 +36,7 @@ public class RichText {
      */
     public static SpannableString GetSpannableString(Bitmap bitmap, String specialchar){
         SpannableString spannableString = new SpannableString(specialchar);
-        Log.d(TAG,"diaonma"+Components.ed_content.getWidth()+"////"+Components.ed_content.getHeight());
+        Log.d(TAG,"diaonma"+ Components.ed_content.getWidth()+"////"+ Components.ed_content.getHeight());
        /* BitmapFactory.Options opts = new BitmapFactory.Options();
         opts.inSampleSize = 2;*/
         Log.e(TAG,"大小为（m）："+bitmap.getByteCount() / 1024 / 1024+"宽度为" + bitmap.getWidth() + "高度为" + bitmap.getHeight());
@@ -63,16 +64,23 @@ public class RichText {
      */
     public static void initifphotohave() {
 
-        //用下面函数可以将控件宽高提前拿到
+        /**
+         * 添加回调函数，在控件完成绘制，确定宽高的时候执行自己的代码
+         */
         Components.ed_content.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 
             @Override
             public void onGlobalLayout() {
-                // TODO Auto-generated method stub
-                Components.ed_content.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                Components.mPhotoTool.addsize(Components.ed_content.getWidth(),Components.ed_content.getHeight());
+
+                Components.ed_content.getViewTreeObserver().removeGlobalOnLayoutListener(this);         //移除回调函数
+
+
+                Components.mPhotoTool.addsize(Components.ed_content.getWidth(), Components.ed_content.getHeight());  //记录宽高
+
                 String world = Components.data.getContent();
                 String now = world;         //还有的文本
+
+
                 //全部文本
                 int startindex=0;      //要替换图片的位置
                 int endindex=0;        //要替换图片的位置
@@ -84,6 +92,9 @@ public class RichText {
                 Log.d(TAG," size ;:"+ now.indexOf("amr")+"   "+now.indexOf("jpg"));
 
                 Log.d(TAG,"ed text ;:"+ Components.mPhotoTool.BitmapAdressSize());
+
+
+
                 //替换掉图片部分
                 if (Components.mPhotoTool.BitmapAdressSize() + Components.mPhotoTool.RecordAdressSize()>0){
                     for (i=0; i<Components.mPhotoTool.BitmapAdressSize() + Components.mPhotoTool.RecordAdressSize();i++) {
@@ -143,6 +154,7 @@ public class RichText {
                     Components.ed_content.setText(Components.data.getContent());
 
             }
+
         });
 
     }
