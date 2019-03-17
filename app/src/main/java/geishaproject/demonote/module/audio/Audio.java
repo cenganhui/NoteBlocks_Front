@@ -85,21 +85,12 @@ public class Audio {
                                 recordModel.setPlayed(false);
                                 Components.mRecords = recordModel;
                                 String newAudioPath =Components.data.getAudioPath()+Components.mRecords.getPath()+"?";
-<<<<<<< HEAD
                                 Components.mPhotoTool.saverecordadress(Components.mRecords.getPath());
                                 //输出录音小标识到文本***********
                                 Bitmap bitmap= BitmapFactory.decodeResource(PublicContext.getContext().getResources(), R.drawable.record);
                                 //Log.e(TAG,"addAudioListener :"+mRecords.getPath() );
                                 SpannableString spannableString = RichText.GetRecordSpannableString(1, Components.mRecords.getPath());
                                 Components.ed_content.append(spannableString);
-=======
-                                //输出录音小标识到文本***********
-                                Bitmap bitmap= BitmapFactory.decodeResource(PublicContext.getContext().getResources(), R.drawable.record);
-                                //Log.e(TAG,"addAudioListener :"+mRecords.getPath() );
-                                SpannableString spannableString = RichText.GetSpannableString(bitmap, Components.mRecords.getPath());
-                                Components.ed_content.append(spannableString);
-                                Components.mPhotoTool.saverecordadress(Components.mRecords.getPath());
->>>>>>> a4b45d315d429b50eab0424ce795668a9643470a
                                 //拼接的路径重新存入data中
                                 Components.data.setAudioPath(newAudioPath);
                                 Components.data.cutAudioPathArr();
