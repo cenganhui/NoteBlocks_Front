@@ -61,6 +61,7 @@ import java.util.Random;
 
 
 import geishaproject.demonote.module.audio.AlarmReceiver;
+import geishaproject.demonote.module.audio.Audio;
 import geishaproject.demonote.module.richtext.RichText;
 import geishaproject.demonote.ui.Components;
 import geishaproject.demonote.utils.PublicContext;
@@ -75,7 +76,6 @@ import geishaproject.demonote.module.picture.PhotoTool;
 import geishaproject.demonote.module.permission.PermissionHelper;
 
 import static android.app.AlertDialog.THEME_HOLO_LIGHT;
-import static geishaproject.demonote.module.richtext.RichText.initifphotohave;
 
 
 public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPreDrawListener {
@@ -99,13 +99,27 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
      * 活动相关初始化，在这里加入模块初始化
      */
     private void init(){
-        Components.floatingActionButton = (FloatingActionButton) findViewById(R.id.finish); //实例化右下角按钮控件
-        initAudio(); //初始化录音功能模块
-        initPhoto(); //初始化拍照功能模块
+        Components.mHelper = new PermissionHelper(this);//授权处理
+        getAllViewById();   //获取控件
+        Audio.initAudio(); //初始化录音功能模块
+        PhotoTool.initPhoto(); //初始化拍照功能模块
         initDataModel(); //初始化数据模型
         initEditText();  //初始化文本编辑框
-        initifphotohave(); //初始化富文本显示
+        RichText.initifphotohave(); //初始化富文本显示
         Log.d("initFinish","width:"+Components.ed_content.getWidth()+",text: "+Components.ed_content.getText());
+    }
+
+    /**
+     * 获取控件函数，在此完成所有的findViewById
+     */
+    private void getAllViewById(){
+        Components.floatingActionButton = (FloatingActionButton) findViewById(R.id.finish); //实例化右下角按钮控件
+
+        Components.ed_title = (EditText) findViewById(R.id.title);    //实例化文字编辑框
+        Components.ed_content = (EditText) findViewById(R.id.content);
+
+        Components.PlayRecord = (Button) findViewById(R.id.PlayBtn);  //播放录音按钮
+        Components.mEmTvBtn = (AudioRecordButton) findViewById(R.id.em_tv_btn);
     }
 
     /**
@@ -116,13 +130,11 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
             @Override
             public void onClick(View v) {
                 onBackPressed();
-
             }
         });
-        addAudioListener(); //添加录音点击事件
 
+        Audio.addAudioListener(); //添加录音点击事件
     }
-
 
     /**
      * 初始化数据模型
@@ -133,7 +145,6 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
         if (idsFlag != 0) {    //根据data的ids判断是新建还是读写，如果是读写，则显示对应数据
             Components.data = DataDao.GetDataByIds(idsFlag);
             Components.mPhotoTool = new PhotoTool(Components.data);
-
         }else{                       //如果是新建，则创建一个新的数据模型
             Components.data=new Data(0,"","","","","");
             Components.mPhotoTool = new PhotoTool(Components.data);
@@ -144,76 +155,13 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
      * 初始化文本编辑框
      */
     private void initEditText(){
-        Components.ed_title = (EditText) findViewById(R.id.title);    //实例化文字编辑框
-        Components.ed_content = (EditText) findViewById(R.id.content);
-
         Components.ed_title.setText(Components.data.getTitle());  //获取对应的值
         Components.mPhotoTool.doclear();
         Components.mPhotoTool.readyAdress();
     }
 
-
-
-    /*  录音  */
     /**
-     * 初始化录音模块
-     */
-    private void initAudio() {
-        Components.player = new MediaPlayer();   //实例化录音控件
-        Components.PlayRecord = (Button) findViewById(R.id.PlayBtn);  //播放录音按钮
-        Components.mEmTvBtn = (AudioRecordButton) findViewById(R.id.em_tv_btn);
-    }
-
-    /**
-     * 添加录音点击事件监听
-     */
-    private void addAudioListener() {
-        Components.PlayRecord.setOnClickListener(new View.OnClickListener() {        //播放录音点击事件
-            @Override
-            public void onClick(View v) {
-                PlayR();
-            }
-        });
-
-        Components.mEmTvBtn.setHasRecordPromission(false);
-        //授权处理
-        Components.mHelper = new PermissionHelper(this);
-
-        Components.mHelper.requestPermissions("请授予[录音]、[读写]权限，否则无法录音",
-                new PermissionHelper.PermissionListener() {
-                    @Override
-                    public void doAfterGrand(String... permission) {
-                        Components.mEmTvBtn.setHasRecordPromission(true);
-
-                        Components.mEmTvBtn.setAudioFinishRecorderListener(new AudioRecordButton.AudioFinishRecorderListener() {
-                            @Override
-                            public void onFinished(float seconds, String filePath) {
-                                Record recordModel = new Record();
-                                recordModel.setSecond((int) seconds <= 0 ? 1 : (int) seconds);
-                                recordModel.setPath(filePath);
-                                recordModel.setPlayed(false);
-                                Components.mRecords = recordModel;
-                                String newAudioPath =Components.data.getAudioPath()+Components.mRecords.getPath()+"?";
-                                //拼接的路径重新存入data中
-                                Components.data.setAudioPath(newAudioPath);
-                                Components.data.cutAudioPathArr();
-                                Toast.makeText(NewNote.this, newAudioPath, Toast.LENGTH_SHORT).show();
-                                //Toast.makeText(NewNote.this, "录音保存成功！时长："+mRecords.getSecond()+"s", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void doAfterDenied(String... permission) {
-                        Components.mEmTvBtn.setHasRecordPromission(false);
-                        Toast.makeText(NewNote.this, "请授权,否则无法录音", Toast.LENGTH_SHORT).show();
-                    }
-                }, Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-    }
-
-    /**
-     * 终止语音播放
+     * 重写onPause方法，在退出界面时自动终止语音播放
      */
     @Override
     protected void onPause() {
@@ -222,58 +170,17 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
     }
 
     /**
-     * 播放录音
-     */
-    private void PlayR () {
-        if(!Components.data.getAudioPath().equals("")) {
-            if (Components.player != null) {
-                Components.player.reset();
-                try {
-                    Components.data.cutAudioPathArr();
-                    Toast.makeText(NewNote.this, Components.data.getAudioPath(), Toast.LENGTH_SHORT).show();
-                    int i = Components.data.getAudioPathArr().size();
-                    Log.d("***size","*/*/*/*size"+i);
-                    Components.player.setDataSource(Components.data.getAudioPathArr().get(i-1)); //获取录音文件
-                    Components.player.prepare();
-                    Components.player.start();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }
-        else{
-            Toast.makeText(NewNote.this, "还未曾录音", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-
-
-    /*  拍照部分  */
-    /**
-     * 初始化拍照模块
-     */
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
-    private void initPhoto() {
-        // android 7.0系统解决拍照的问题
-        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
-        StrictMode.setVmPolicy(builder.build());
-        builder.detectFileUriExposure();
-    }
-
-    /**
      *  相机拍完照之后的回调
      */
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    protected void onActivityResult(int requestCode, int resultCode, Intent photoIntent) {
+        super.onActivityResult(requestCode, resultCode, photoIntent);
         if (requestCode == Components.REQUSET_CODE) {
             if (resultCode == Activity.RESULT_OK ) {    //&& data != null 旧版条件，data缩略图
                 //说明成功返回
                 Uri uri = null;
-                if (data != null && data.getData() != null) {
-                    uri = data.getData();
+                if (photoIntent != null && photoIntent.getData() != null) {
+                    uri = photoIntent.getData();
                 }
                 if (uri == null) {
                     if (Components.photoUri != null) {
@@ -291,19 +198,16 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
                     //将图片一次性切好
                     Bitmap imgBitmap = PhotoTool.imageScale(result,Components.ed_content.getWidth(),Math.round(result.getHeight()*((float) Components.ed_content.getWidth()/result.getWidth())));
                     //保存图片
-                    Components.mPhotoTool.saveImg(imgBitmap,this);
+                    Components.mPhotoTool.saveImg(imgBitmap,PublicContext.getContext());
                     SpannableString spannableString = RichText.GetSpannableString(imgBitmap,Components.mPhotoTool.GetBitmapNmae(Components.mPhotoTool.BitmapAdressSize()-1));
                     Components.ed_content.append(spannableString);
                 }
             }else if (resultCode == Activity.RESULT_CANCELED) {
                 //说明取消或失败了
-                Toast.makeText(this,"您取消了拍照！",Toast.LENGTH_SHORT).show();
+                Toast.makeText(PublicContext.getContext(),"您取消了拍照！",Toast.LENGTH_SHORT).show();
             }
         }
     }
-
-
-    /*  闹钟部分  */
 
     /**
      * 添加闹钟函数
@@ -325,7 +229,7 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
         final Calendar hh = Calendar.getInstance();
 
         //年月日选择工具
-        DatePickerDialog datePickerDialog = new DatePickerDialog(NewNote.this,THEME_HOLO_LIGHT, new DatePickerDialog.OnDateSetListener() {
+        DatePickerDialog datePickerDialog = new DatePickerDialog(PublicContext.getContext(),THEME_HOLO_LIGHT, new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
 
@@ -335,7 +239,7 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
                 hh.set(Calendar.DAY_OF_MONTH,dayOfMonth);
 
                 //小时，分钟选择工具
-                TimePickerDialog dialog = new TimePickerDialog(NewNote.this,THEME_HOLO_LIGHT, new TimePickerDialog.OnTimeSetListener() {
+                TimePickerDialog dialog = new TimePickerDialog(PublicContext.getContext(),THEME_HOLO_LIGHT, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
 
@@ -349,7 +253,7 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
                         //创建AlarmManager提醒器
                         AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);//获取AlarmManager实例
                         //建立广播对象
-                        Intent intent = new Intent(NewNote.this,AlarmReceiver.class);
+                        Intent intent = new Intent(PublicContext.getContext(),AlarmReceiver.class);
                         //传送标题，在提醒时显示
                         intent.putExtra("title","标题："+Components.ed_title.getText().toString());
                         //Log.d(TAG,data.getTitle() + ed_title.getText().toString()); 调试
@@ -359,7 +263,7 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
                             pi = PendingIntent.getBroadcast(PublicContext.getContext(), DataDao.GetMaxIds(), intent, 0);
                             System.out.print( DataDao.GetMaxIds());
                         }else {
-                            pi = PendingIntent.getBroadcast(NewNote.this, Components.data.getIds(), intent, 0);
+                            pi = PendingIntent.getBroadcast(PublicContext.getContext(), Components.data.getIds(), intent, 0);
                             Log.d(TAG,""+Components.data.getIds());
                         }
 
@@ -387,7 +291,6 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
         datePickerDialog.show();
     }
 
-    /*  系统界面点击功能等  */
     /**
      * 重写返回建方法，如果是属于新建则插入数据表并返回主页面，如果是修改，修改表中数据并返回主页面
      */
@@ -399,13 +302,14 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
 
         //先将数据库内setPicturePath置空，在saveimg中才将正确的留下
         Components.data.setPicturePath("");
+        Components.data.setAudioPath("");
         Components.data.setTimes(time);    //给当前data更新数据,如果有录音和拍照数据，应该在对应的过程中调用data.setXXX
         Components.data.setTitle(Components.ed_title.getText().toString());
         Components.data.setContent(Components.ed_content.getText().toString());
 
         //才将图片保存进入数据库
         PhotoTool.check();
-
+        Components.mPhotoTool.showwwww();
         if(Components.data.getIds()!=0){ //根据data修改数据库
             DataDao.ChangeData(Components.data);
             Intent intent=new Intent(NewNote.this,MainActivity.class);
@@ -419,9 +323,8 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
         }
     }
 
-
     /**
-     *
+     * 右上角菜单选项创建
      * @param menu
      * @return
      */
@@ -431,14 +334,6 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
         return true;
     }
 
-
-    @Override
-    public boolean onPreDraw() {
-        return false;
-    }
-
-
-    /*  右上角菜单点击事件  */
     /**
      * 响应右上角菜单的点击事件
      * @param item
@@ -512,14 +407,9 @@ public class NewNote extends AppCompatActivity implements ViewTreeObserver.OnPre
         startActivity(intent);
     }
 
-    /**
-     * 权限请求，直接把参数交给mHelper就行了
-     * @param requestCode
-     * @param permissions
-     * @param grantResults
-     */
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        Components.mHelper.handleRequestPermissionsResult(requestCode, permissions, grantResults);
+    public boolean onPreDraw() {
+        return false;
     }
+
 }

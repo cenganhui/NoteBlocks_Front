@@ -184,7 +184,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.menu_import:
                 mImport();
                 break;
-
+            case R.id.menu_login:
+                mLogin();
+                break;
             default:
                 break;
         }
@@ -192,6 +194,14 @@ public class MainActivity extends AppCompatActivity {
         //return false;????是用哪个true or false？
     }
 
+    /**
+     * 跳转登录注册页面
+     */
+    public void mLogin(){
+        Intent intent = new Intent(getApplicationContext(),LoginActivity.class);
+        startActivity(intent);
+        MainActivity.this.finish();
+    }
     /**
      * 导出便签包操作
      */

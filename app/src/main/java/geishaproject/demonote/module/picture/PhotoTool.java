@@ -1,5 +1,6 @@
 package geishaproject.demonote.module.picture;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -7,7 +8,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.os.StrictMode;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import java.io.BufferedOutputStream;
@@ -20,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import geishaproject.demonote.model.Data;
+import geishaproject.demonote.module.audio.Record;
 import geishaproject.demonote.ui.Components;
 
 public class PhotoTool extends Activity{
@@ -29,7 +34,7 @@ public class PhotoTool extends Activity{
      */
     public static java.util.List<Bitmap> bitmaplist = new java.util.ArrayList<Bitmap>();
     ArrayList<String> pictureName = new ArrayList<String>();     //存放分割好的图片路径
-    private String specialchar = "a";
+    ArrayList<String> musicName = new ArrayList<String>();     //存放分割好的图片路径
     private Uri photoUri;
     private Data data;
     private int width;
@@ -38,6 +43,18 @@ public class PhotoTool extends Activity{
      * 构造函数
      */
     public PhotoTool(Data data){ this.data = data; }
+
+    /**
+     * 初始化拍照模块
+     */
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
+    public static void initPhoto() {
+        // android 7.0系统解决拍照的问题
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+        builder.detectFileUriExposure();
+    }
     /**
      * 加载data数据
      */
@@ -56,22 +73,37 @@ public class PhotoTool extends Activity{
         return pictureName.size();
     }
     /**
+     * 返回音频数组大小
+     */
+    public int RecordAdressSize(){
+        return musicName.size();
+    }
+    /**
      * 返回图片
      */
     public Bitmap GetBitmap(int i) {
         return bitmaplist.get(i);
     }
     /**
-     * 返回图片名称
+     * 返回图片，音频名称
      */
     public String GetBitmapNmae(int i) {
         return pictureName.get(i);
+    }
+    public String GetRecordNmae(int i) {
+        return musicName.get(i);
+    }
+    /**
+     * 保存图片路径
+     */
+    public void saverecordadress(String i) {
+        musicName.add(i);
     }
     /**
      * 清理缓存，每次打开便签先清，后开
      */
     public void doclear() {
-        pictureName.clear();
+        pictureName.clear();musicName.clear();
     }
     /**
      * 清理图片
@@ -80,8 +112,12 @@ public class PhotoTool extends Activity{
         pictureName.remove(i);
         Log.d(TAG,"成功删除 "+i);
     }
+    public void deletemusic(int i){
+        Log.d(TAG,"音频成功删除 "+i);
+        musicName.remove(i);
+    }
     /**
-     * 准备图片地址
+     * 准备图片,音频地址
      */
     public void readyAdress() {
         for (int i = 0; i < data.getPicturePathArr().size(); i++) {
@@ -91,6 +127,15 @@ public class PhotoTool extends Activity{
                 Log.i("PicturePath**&&&&", firstPicturePath);
                 pictureName.add(firstPicturePath);      //加载地址
                 Log.d(TAG, "diaonimadadadada:" + pictureName.size());       //观察成功载入否
+            }
+        }
+        Log.d(TAG,"data 中 音频量" + data.getAudioPathArr().size());
+        for (int i = 0; i < data.getAudioPathArr().size(); i++) {
+            if (!data.getAudioPath().equals("")) {
+                String firstMusicPath = data.getAudioPathArr().get(i);
+                Log.i("PicturePath**&&&&", firstMusicPath);
+                musicName.add(firstMusicPath);      //加载地址
+                Log.d(TAG, "diaonimadadad:" + musicName.size());       //观察成功载入否
             }
         }
     }
@@ -104,9 +149,21 @@ public class PhotoTool extends Activity{
         return bitmap;
     }
     /**
-     * 通过地址删除图片
+     * 通过地址获取音频
+     */
+    public Record getRecordForAdress(String adress){
+        Record record = new Record();
+        record.setPath(adress);
+        record.setPlayed(false);
+        return record;
+    }
+    /**
+     * 通过地址删除图片，音频
      */
     public void deleteBitmapForAdress(String adress){
+        deleteSingleFile(adress);
+    }
+    public void deleteRecordForAdress(String adress){
         deleteSingleFile(adress);
     }
 
@@ -191,9 +248,10 @@ public class PhotoTool extends Activity{
     /**
      * 保存图片地址到数据库
      */
-    public void saveToData() {
+        public void saveToData() {
         //清除原本的记录，按最后的结果来
         data.getPicturePathArr().clear();
+        data.getAudioPathArr().clear();
         Log.d(TAG, "保存图片时，大小：" + pictureName.size());
         for (int i = 0; i < pictureName.size(); i++) {
             //图片文件以当前时间命名，路径为pictureFile.getAbsolutePath()
@@ -210,8 +268,25 @@ public class PhotoTool extends Activity{
             data.setPicturePath(newPicturePath);
             data.cutPicturePath();
             Log.i("PicturePath&&&&", newPicturePath);
+        }
+        for (int i = 0; i < musicName.size(); i++) {
+            //yinpin文件以当前时间命名，路径为pictureFile.getAbsolutePath()
+            File recordFile = new File(musicName.get(i));
+            if (!recordFile.exists()) {
+                try {
+                    recordFile.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            String newRecordPath = data.getAudioPath() + recordFile.getAbsolutePath() + "?";
+            //拼接的路径重新存入data中
+            data.setAudioPath(newRecordPath);
+            data.cutAudioPathArr();
+            Log.e("musicPath&&&&", newRecordPath);
 
         }
+        Log.i("musicPath&&&&", data.getAudioPath());
     }
     /**
      * 删除实际本地文件
@@ -255,19 +330,45 @@ public class PhotoTool extends Activity{
                 }
             }
         }
+        world = Components.data.getContent();
+        now = world;         //还有的文本
+        endindex=0;        //要替换图片的位置
+        i=0;               //变量
+        temp = 0;
+        if (Components.mPhotoTool.RecordAdressSize()>0){
+            for (i=0; i<Components.mPhotoTool.RecordAdressSize();i++) {
+                //数据定义
+                String show;        //要放上去的文本
+                //找到要替换的特殊字符位置
+                Log.d(TAG,"yinpindizhi:"+ Components.mPhotoTool.GetRecordNmae(i));
+                endindex = now.indexOf(Components.mPhotoTool.GetRecordNmae(i));
+                if(endindex == -1){
+                    //删除实际文件
+                    Components.mPhotoTool.deleteRecordForAdress(Components.mPhotoTool.GetRecordNmae(i-temp));
+                    //删除变量内容
+                    Components.mPhotoTool.deletemusic(i-temp);
+                    temp++;
+                }else{
+                    //切割子文本
+                    show = now.substring(0, endindex);
+                    now = now.substring(endindex + Components.mPhotoTool.GetRecordNmae(i).length());
+                    //输出文本
+                }
+            }
+        }
         //当检查完后才真正保存
         Components.mPhotoTool.saveToData();
     }
 
+
     /**
-     * 为斌哥存bug----text view
-     * android:paddingTop="4dp"
-     android:paddingBottom="50dp"
-     android:paddingLeft="7dp"
-     android:paddingRight="4dp"
-     android:paddingBottom="10dp"
-     android:paddingLeft="7dp"
-     android:paddingRight="4dp"
-     android:paddingTop="4dp"
+     * 调试专用
      */
+    public void showwwww(){
+        Log.e(TAG,"音频总地址daixoa:"+data.getAudioPathArr().size());
+        for(int i=0;i<musicName.size();i++){
+            Log.e(TAG,"音频单独地址"+musicName.get(i));
+        }
+        Log.e(TAG,"音频总地址"+data.getAudioPathArr());
+    }
 }
