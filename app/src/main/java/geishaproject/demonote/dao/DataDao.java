@@ -1,7 +1,6 @@
 package geishaproject.demonote.dao;
 
 import java.util.ArrayList;
-
 import geishaproject.demonote.model.Data;
 
 public class DataDao {
@@ -100,9 +99,6 @@ public class DataDao {
     public static void DeleteDataAllData(){
         MyDatabase.DeleteAllData();
         allDataArr.clear();
-        /*for(int i=0; i<allDataArr.size() ; i++){
-            allDataArr.remove(i);
-        }*/
     }
 
 

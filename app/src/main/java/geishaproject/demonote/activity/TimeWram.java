@@ -1,6 +1,9 @@
 package geishaproject.demonote.activity;
 
 import android.app.Activity;
+
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,6 +15,9 @@ import android.os.Vibrator;
 import android.support.v7.app.AlertDialog;
 import android.view.Window;
 import android.view.WindowManager;
+
+import geishaproject.demonote.service.MyService;
+import geishaproject.demonote.utils.PublicContext;
 
 
 //响铃界面
@@ -31,7 +37,6 @@ public class TimeWram extends Activity {
         title = intent.getStringExtra("title");
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         //设置屏幕唤醒
-        //Toast.makeText(getApplicationContext(),"成功跳转",Toast.LENGTH_SHORT).show();测试
         Window win = getWindow();
         WindowManager.LayoutParams winParams = win.getAttributes();
         winParams.flags |= (WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
@@ -81,6 +86,9 @@ public class TimeWram extends Activity {
                         //回到首页列表
                        // Intent intent1 = new Intent(TimeWram.this,MainActivity.class);
                         //startActivity(intent1);
+
+                        Intent intentservice = new Intent(PublicContext.getContext() , MyService.class);
+                        stopService(intentservice);
                     }
                 }).show();
 
@@ -97,7 +105,6 @@ public class TimeWram extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        //media.release();
         //释放屏幕
         releaseWakeLock();
     }

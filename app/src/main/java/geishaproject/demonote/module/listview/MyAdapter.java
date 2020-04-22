@@ -3,29 +3,16 @@ package geishaproject.demonote.module.listview;
 
 
 
+import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
-
 import android.view.View;
-
 import android.view.ViewGroup;
-
 import android.widget.BaseAdapter;
-
 import android.widget.TextView;
-
-
-
 import geishaproject.demonote.R;
-
-
 import java.util.ArrayList;
-
-
-
 import geishaproject.demonote.model.Data;
-
-
 
 public class MyAdapter extends BaseAdapter {
 
@@ -82,15 +69,26 @@ public class MyAdapter extends BaseAdapter {
         }
         vh=(ViewHolder) convertView.getTag();
         vh.tv1.setText( array.get(position).getTitle() );
-        vh.tv2.setText( cutLongContent( array.get(position).getContent() ) ); //显示内容时做截断优化
+        vh.tv2.setText( dealContent(array.get(position).getContent()) ); //显示内容时做截断优化
         vh.tv3.setText( array.get(position).getTimes() );
 
         Log.d("setText","MyAdapter: "+array.get(position).getTimes());
         return convertView;
     }
 
-    /*
-        对内容长度进行处理,
+    /**
+     * 处理一些内部标识和长度美化后再显示在界面上
+     * @param originalContent
+     * @return
+     */
+    public String dealContent(String originalContent){
+        return cutLongContent( replaceAddress( originalContent ) );
+    }
+
+    /**
+     * 过长时添加缩略号
+     * @param longContent
+     * @return
      */
     public String cutLongContent(String longContent){
         if(longContent.length()>=maxLength) {
@@ -98,6 +96,18 @@ public class MyAdapter extends BaseAdapter {
         }else{
             return longContent;
         }
+    }
+
+    /**
+     * 对真实地址进行美化替换处理
+     * @param originalContent
+     * @return
+     */
+    public String replaceAddress(String originalContent){
+        //使用replaceAll支持正则
+        originalContent=originalContent.replaceAll(Environment.getExternalStorageDirectory().getPath()+"/NoteBlocks/record/\\d*.amr","[录音]")
+                                        .replaceAll(Environment.getExternalStorageDirectory().getPath()+"/NoteBlocks/picture/\\d*.jpg","[图片]");
+        return originalContent;
     }
     class ViewHolder{     //内部类，对控件进行缓存
         TextView tv1,tv2,tv3;

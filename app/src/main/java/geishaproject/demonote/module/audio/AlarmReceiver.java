@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-
 import geishaproject.demonote.activity.TimeWram;
 
 public class AlarmReceiver extends BroadcastReceiver {

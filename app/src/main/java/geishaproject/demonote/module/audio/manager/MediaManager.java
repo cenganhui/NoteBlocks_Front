@@ -9,7 +9,6 @@ import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.util.Log;
-
 import java.io.IOException;
 
 /**

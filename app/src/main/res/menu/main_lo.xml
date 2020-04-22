@@ -2,13 +2,13 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item
+    <!--<item-->
 
-        android:id="@+id/menu_newnote"
+        <!--android:id="@+id/menu_newnote"-->
 
-        android:title="@string/menu_newnote"
+        <!--android:title="@string/menu_newnote"-->
 
-        />
+        <!--/>-->
     <item
 
         android:id="@+id/menu_export"
@@ -25,19 +25,34 @@
         />
     <item
 
-        android:id="@+id/menu_login"
+        android:id="@+id/menu_register"
 
         android:title="@string/menu_login"
 
         />
 
+    <!--<item-->
+
+        <!--android:id="@+id/menu_exit"-->
+
+        <!--android:title="@string/menu_exit"-->
+
+        <!--/>-->
+
     <item
 
-        android:id="@+id/menu_exit"
+        android:id="@+id/menu_backup"
 
-        android:title="@string/menu_exit"
+        android:title="@string/menu_backup"
 
         />
 
+    <item
+
+        android:id="@+id/menu_recovery"
+
+        android:title="@string/menu_recovery"
+
+        />
 
 </menu>

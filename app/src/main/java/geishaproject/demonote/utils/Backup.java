@@ -2,7 +2,6 @@ package geishaproject.demonote.utils;
 
 import android.util.JsonReader;
 import android.util.JsonWriter;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -11,7 +10,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import geishaproject.demonote.model.Data;
 import geishaproject.demonote.dao.DataDao;
 
@@ -34,7 +34,6 @@ public class Backup {
             }
         }
         String filePath = JSONFile.getAbsolutePath();
-        //Log.d("JsonPath***",filePath);
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(filePath);
 
@@ -42,8 +41,6 @@ public class Backup {
             JsonWriter jsonWriter = new JsonWriter(new OutputStreamWriter(fileOutputStream,"UTF-8"));
             jsonWriter.setIndent("  ");
             jsonWriter.beginArray();
-
-            //Log.d("*/*/*/*//*",""+arrayList.size());
             for(int i = DataDao.GetAllDatas().size()-1; i>=0; i--){
                 jsonWriter.beginObject();
                 jsonWriter.name("id").value(DataDao.GetAllDatas().get(i).getIds());
@@ -55,7 +52,6 @@ public class Backup {
                 jsonWriter.endObject();
             }
             jsonWriter.endArray();
-            //Toast.makeText(MainActivity.this, "成功！", Toast.LENGTH_SHORT).show();
             jsonWriter.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -99,28 +95,33 @@ public class Backup {
                     else if(s.equals("picturePath")){
                         data.setPicturePath(jsonReader.nextString());
                     }
-                    else if(s.equals("times")){
-                        data.setTimes(jsonReader.nextString());
-                    }
                     else{
                         jsonReader.skipValue();
                     }
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//"+"T"+"编辑便签的时间，格式化
+                    Date date = new Date(System.currentTimeMillis());
+                    String time = simpleDateFormat.format(date);
+                    //创建新时间
+                    data.setTimes(time);
                 }
                 jsonReader.endObject();
                 data.cutPicturePath();
                 data.cutAudioPathArr();
-                boolean flag = DataDao.AddNewData(data);
-                //Log.d("testDataDao*1","data： "+data);
-            }
-            for(int i= 0; i<DataDao.GetAllDatas().size();i++){
-                //Log.d("testDataDao*2","data： "+DataDao.GetAllDatas().get(i));
+                //若便签不相同，则添加便签
+                boolean sign = false;
+                for (int i=0;i<DataDao.GetAllDatas().size();i++){
+                    if(isTheSameData(data,DataDao.GetAllDatas().get(i))){
+                        sign = true;
+                        break;
+                    }
+                }
+                if(!sign){
+                    boolean flag = DataDao.AddNewData(data);
+                }
             }
 
             jsonReader.endArray();
             jsonReader.close();
-
-            //Toast.makeText(MainActivity.this, arrayList.get(3).toString(), Toast.LENGTH_SHORT).show();
-
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
@@ -129,6 +130,23 @@ public class Backup {
             e.printStackTrace();
         }
 
+    }
+
+    /**
+     * 判断两个便签是否相同
+     * @param data1
+     * @param data2
+     * @return
+     */
+    public static boolean isTheSameData(Data data1, Data data2){
+        String titleAndContent1 = data1.getTitle()+data1.getContent();
+        String titleAndContent2 = data2.getTitle()+data2.getContent();
+        if(titleAndContent1.equals(titleAndContent2)){
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
 }

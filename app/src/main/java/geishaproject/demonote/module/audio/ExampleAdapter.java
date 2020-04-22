@@ -11,10 +11,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import geishaproject.demonote.R;
 import geishaproject.demonote.module.audio.manager.MediaManager;
 
@@ -128,9 +126,7 @@ public class ExampleAdapter extends BaseAdapter {
     }
 
     private void resetData() {
-        //for (Record record : mRecords) {
-        //    record.setPlaying(false);//保证在第二次点击该语音栏时当作没有“不是在播放状态”。
-        //}
+
     }
 
     private void resetAnim(AnimationDrawable animationDrawable) {

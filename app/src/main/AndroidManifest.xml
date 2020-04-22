@@ -18,7 +18,7 @@
     <!-- 传感器权限 -->
     <uses-permission android:name="android.permission.BODY_SENSORS" />
     <!-- 网络权限 -->
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
@@ -28,12 +28,12 @@
     <application
         android:name=".utils.PublicContext"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/icon_note3"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/icon_note3"
         android:supportsRtl="true"
-        android:usesCleartextTraffic="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
         <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -42,13 +42,38 @@
             </intent-filter>
         </activity>
 
+
+        <receiver android:name=".service.MyService"
+            android:enabled="true"
+            android:exported="true" >
+            <intent-filter>
+            　　<action android:name="play"/>
+            　　<action android:name="pause"/>
+            　　<action android:name="last"/>
+            　　<action android:name="next"/>
+            </intent-filter>
+        </receiver>
+            />
+
         <receiver
             android:name=".module.audio.AlarmReceiver"
-            android:process=":newinst" />
-
+            android:process=":newinst"
+            />
+        /
         <activity android:name=".activity.TimeWram" />
         <activity android:name=".activity.NewNote" />
-        <activity android:name=".activity.LoginActivity" android:label="登陆"></activity>
+        <activity
+            android:name=".activity.RegisterActivity"
+            android:label="注册" />
+        <activity
+            android:name=".activity.LoginActivity"
+            android:label="@string/title_activity_login"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <service
+            android:name=".service.MyService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

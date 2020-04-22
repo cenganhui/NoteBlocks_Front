@@ -1,7 +1,6 @@
 package geishaproject.demonote.utils;
 
 import android.util.Log;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -63,23 +62,6 @@ public class Constant {
                     fileOutputStream.flush();
                     fileOutputStream.close();
                 }
-
-            /* 如果不需要打log，可以使用下面的语句
-            if (temp.isDirectory()) {   //如果是子文件夹
-                copyFolder(oldPath + "/" + file, newPath + "/" + file);
-            } else if (temp.exists() && temp.isFile() && temp.canRead()) {
-                FileInputStream fileInputStream = new FileInputStream(temp);
-                FileOutputStream fileOutputStream = new FileOutputStream(newPath + "/" + temp.getName());
-                byte[] buffer = new byte[1024];
-                int byteRead;
-                while ((byteRead = fileInputStream.read(buffer)) != -1) {
-                    fileOutputStream.write(buffer, 0, byteRead);
-                }
-                fileInputStream.close();
-                fileOutputStream.flush();
-                fileOutputStream.close();
-            }
-            */
             }
         } catch (Exception e) {
             e.printStackTrace();

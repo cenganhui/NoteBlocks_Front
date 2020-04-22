@@ -7,38 +7,30 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
-
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-
 import geishaproject.demonote.model.Data;
-import geishaproject.demonote.module.audio.Record;
-import geishaproject.demonote.ui.Components;
 
 public class PhotoTool extends Activity{
     private static final String TAG = "PhotoTool";
     /**
      * 照片数组,放置照片的特殊字符（啊斌）,相机url,data数据,长，宽
      */
-    public static java.util.List<Bitmap> bitmaplist = new java.util.ArrayList<Bitmap>();
-    ArrayList<String> pictureName = new ArrayList<String>();     //存放分割好的图片路径
-    ArrayList<String> musicName = new ArrayList<String>();     //存放分割好的图片路径
+
     private Uri photoUri;
     private Data data;
-    private int width;
-    private int height;
     /**
      * 构造函数
      */
@@ -55,91 +47,7 @@ public class PhotoTool extends Activity{
         StrictMode.setVmPolicy(builder.build());
         builder.detectFileUriExposure();
     }
-    /**
-     * 加载data数据
-     */
-    public void adddata(Data data){
-        this.data = data;
-    }
-    /**
-     * 加载,长宽
-     */
-    public void addsize(int width,int height ){ this.width = width;this.height = height;Log.d(TAG,"长宽："+width+" "+height); }
 
-    /**
-     * 返回图片数组大小
-     */
-    public int BitmapAdressSize(){
-        return pictureName.size();
-    }
-    /**
-     * 返回音频数组大小
-     */
-    public int RecordAdressSize(){
-        return musicName.size();
-    }
-    /**
-     * 返回图片
-     */
-    public Bitmap GetBitmap(int i) {
-        return bitmaplist.get(i);
-    }
-    /**
-     * 返回图片，音频名称
-     */
-    public String GetBitmapNmae(int i) {
-        return pictureName.get(i);
-    }
-
-    public String GetRecordNmae(int i) {
-        return musicName.get(i);
-    }
-    /**
-     * 保存图片路径
-     */
-    public void saverecordadress(String i) {
-        musicName.add(i);
-    }
-    /**
-     * 清理缓存，每次打开便签先清，后开
-     */
-    public void doclear() {
-        pictureName.clear();musicName.clear();
-    }
-    /**
-     * 清理图片
-     */
-    public void delete(int i){
-        pictureName.remove(i);
-        Log.d(TAG,"成功删除 "+i);
-    }
-    public void deletemusic(int i){
-        Log.d(TAG,"音频成功删除 "+i);
-        musicName.remove(i);
-    }
-    /**
-     * 准备图片,音频地址
-     */
-    public void readyAdress() {
-        for (int i = 0; i < data.getPicturePathArr().size(); i++) {
-            if (!data.getPicturePath().equals("")) {
-                //data.setPicturePathArr();
-                String firstPicturePath = data.getPicturePathArr().get(i);
-                Log.i("PicturePath**&&&&", firstPicturePath);
-                pictureName.add(firstPicturePath);      //加载地址
-                Log.d(TAG, "diaonimadadadada:" + pictureName.size());       //观察成功载入否
-            }
-        }
-        Log.d(TAG,"data 中 音频量" + data.getAudioPathArr().size());
-        for (int i = 0; i < data.getAudioPathArr().size(); i++) {
-            if (!data.getAudioPath().equals("")) {
-                String firstMusicPath = data.getAudioPathArr().get(i);
-                Log.i("PicturePath**&&&&", firstMusicPath);
-                musicName.add(firstMusicPath);      //加载地址
-                Log.d(TAG, "diaonimadadad:" + musicName.size());       //观察成功载入否
-            }
-        }
-    }
     /**
      * 通过地址获取图片
      */
@@ -148,24 +56,6 @@ public class PhotoTool extends Activity{
         //options.inSampleSize = 2;
         Bitmap bitmap =  BitmapFactory.decodeFile(adress);
         return bitmap;
-    }
-    /**
-     * 通过地址获取音频
-     */
-    public Record getRecordForAdress(String adress){
-        Record record = new Record();
-        record.setPath(adress);
-        record.setPlayed(false);
-        return record;
-    }
-    /**
-     * 通过地址删除图片，音频
-     */
-    public void deleteBitmapForAdress(String adress){
-        deleteSingleFile(adress);
-    }
-    public void deleteRecordForAdress(String adress){
-        deleteSingleFile(adress);
     }
 
     /**
@@ -214,22 +104,18 @@ public class PhotoTool extends Activity{
      *  保存图片
      */
     public void saveImg(Bitmap bitmap,Context context) {
-        //清除原本的记录，按最后的结果来
-        //data.getPicturePathArr().clear();
         //打开输入流
         try {
-                //图片文件以当前时间命名，路径为pictureFile.getAbsolutePath()
-                File pictureFile = new File(getAdress());      //dir1, name
-                pictureName.add(pictureFile.toString());
-                if (!pictureFile.exists()) {
-                    try {
-                        pictureFile.createNewFile();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+            //图片文件以当前时间命名，路径为pictureFile.getAbsolutePath()
+            File pictureFile = new File(getAdress());      //dir1, name
+            if (!pictureFile.exists()) {
+                try {
+                    pictureFile.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 BufferedOutputStream bos = null;
                 //拼接的路径重新存入data中
-                Log.i("******size22*****",""+data.getPicturePathArr().size());
                 Log.i("SaveImg", "file had" );
                 bos = new BufferedOutputStream(new FileOutputStream(pictureFile));      //BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(pictureFile));
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100,bos);           //compress到输出outputStream
@@ -246,130 +132,121 @@ public class PhotoTool extends Activity{
         }
         return ;
     }
-    /**
-     * 保存图片地址到数据库
-     */
-        public void saveToData() {
-        //清除原本的记录，按最后的结果来
-        data.getPicturePathArr().clear();
-        data.getAudioPathArr().clear();
-        Log.d(TAG, "保存图片时，大小：" + pictureName.size());
-        for (int i = 0; i < pictureName.size(); i++) {
-            //图片文件以当前时间命名，路径为pictureFile.getAbsolutePath()
-            File pictureFile = new File(pictureName.get(i));
-            if (!pictureFile.exists()) {
-                try {
-                    pictureFile.createNewFile();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            String newPicturePath = data.getPicturePath() + pictureFile.getAbsolutePath() + "?";
-            //拼接的路径重新存入data中
-            data.setPicturePath(newPicturePath);
-            data.cutPicturePath();
-            Log.i("PicturePath&&&&", newPicturePath);
-        }
-        for (int i = 0; i < musicName.size(); i++) {
-            //yinpin文件以当前时间命名，路径为pictureFile.getAbsolutePath()
-            File recordFile = new File(musicName.get(i));
-            if (!recordFile.exists()) {
-                try {
-                    recordFile.createNewFile();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            String newRecordPath = data.getAudioPath() + recordFile.getAbsolutePath() + "?";
-            //拼接的路径重新存入data中
-            data.setAudioPath(newRecordPath);
-            data.cutAudioPathArr();
-            Log.e("musicPath&&&&", newRecordPath);
 
-        }
-        Log.i("musicPath&&&&", data.getAudioPath());
-    }
     /**
-     * 删除实际本地文件
+     * 获取图片的旋转角度。
+     * 只能通过原始文件获取，如果已经进行过bitmap操作无法获取。
      */
-    private static void deleteSingleFile(String filePath){
-        File file = new File(filePath);
-        if(file.exists()){
-            file.delete();
+    public static int getRotateDegree(String path) {
+        int result = 0;
+        try {
+            ExifInterface exif = new ExifInterface(path);
+            int orientation = exif.getAttributeInt(
+                    ExifInterface.TAG_ORIENTATION,
+                    ExifInterface.ORIENTATION_NORMAL);
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    result = 90;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    result = 180;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    result = 270;
+                    break;
+            }
+        } catch (IOException ignore) {
+            return 0;
+        }
+        return result;
+    }
+
+    /**
+     * 获取缩放数值。
+     * 取值请参考 {@link #evaluateWH(float, float, float, float)}
+     */
+    private static float getScale(float srcWidth, float srcHeight, float destWidth, float destHeight) {
+        int evaluateWH = evaluateWH(srcWidth, srcHeight, destWidth, destHeight);
+        switch (evaluateWH) {
+            case 0:
+                return destWidth / srcWidth;
+            case 1:
+                return destHeight / srcHeight;
+            default:
+                return 1f;
         }
     }
 
     /**
-     * 才将图片保存进入数据库
+     * 评估使用宽或者高计算缩放比例
+     * 以最大缩放比例为准，如宽比例为 0.5， 高比例为0.8，返回宽
+     *
+     * @return 0：宽， 1：高， -1：不缩放
      */
-    public static void check() {
-        String world = Components.data.getContent();
-        String now = world;         //还有的文本
-        int startindex=0;      //要替换图片的位置
-        int endindex=0;        //要替换图片的位置
-        int i=0;               //变量
-        int temp = 0;
-        Log.d(TAG,""+Components.mPhotoTool.BitmapAdressSize());
-        if (Components.mPhotoTool.BitmapAdressSize()>0){
-            for (i=0; i<Components.mPhotoTool.BitmapAdressSize();i++) {
-                //数据定义
-                String show;        //要放上去的文本
-                //找到要替换的特殊字符位置
-                Log.d(TAG,"dizhi:"+Components.mPhotoTool.GetBitmapNmae(i));
-                endindex = now.indexOf(Components.mPhotoTool.GetBitmapNmae(i));
-                if(endindex == -1){
-                    //删除实际文件
-                    Components.mPhotoTool.deleteBitmapForAdress(Components.mPhotoTool.GetBitmapNmae(i-temp));
-                    //删除变量内容
-                    Components.mPhotoTool.delete(i-temp);
-                    temp++;
-                }else{
-                    //切割子文本
-                    show = now.substring(0, endindex);
-                    now = now.substring(endindex + Components.mPhotoTool.GetBitmapNmae(i).length());
-                    //输出文本
-                }
-            }
+    private static int evaluateWH(float srcWidth, float srcHeight, float destWidth, float destHeight) {
+        if (srcWidth < 1f || srcHeight < 1f || srcWidth < destWidth && srcHeight < destHeight) {
+            return -1;
         }
-        world = Components.data.getContent();
-        now = world;         //还有的文本
-        endindex=0;        //要替换图片的位置
-        i=0;               //变量
-        temp = 0;
-        if (Components.mPhotoTool.RecordAdressSize()>0){
-            for (i=0; i<Components.mPhotoTool.RecordAdressSize();i++) {
-                //数据定义
-                String show;        //要放上去的文本
-                //找到要替换的特殊字符位置
-                Log.d(TAG,"yinpindizhi:"+ Components.mPhotoTool.GetRecordNmae(i));
-                endindex = now.indexOf(Components.mPhotoTool.GetRecordNmae(i));
-                if(endindex == -1){
-                    //删除实际文件
-                    Components.mPhotoTool.deleteRecordForAdress(Components.mPhotoTool.GetRecordNmae(i-temp));
-                    //删除变量内容
-                    Components.mPhotoTool.deletemusic(i-temp);
-                    temp++;
-                }else{
-                    //切割子文本
-                    show = now.substring(0, endindex);
-                    now = now.substring(endindex + Components.mPhotoTool.GetRecordNmae(i).length());
-                    //输出文本
-                }
-            }
+        int result;
+        if (destWidth > 0 && destHeight > 0) {
+            result = destWidth / srcWidth < destHeight / srcHeight ? 0 : 1;
+        } else if (destWidth > 0) {
+            result = 0;
+        } else if (destHeight > 0) {
+            result = 1;
+        } else {
+            result = -1;
         }
-        //当检查完后才真正保存
-        Components.mPhotoTool.saveToData();
+        return result;
     }
 
+    // 参考Hashmap::tableSizeFor，根据传入的缩放比例倍数，获取一个临近的2的次幂的数
+    private static int inSampleSizeFor(int n) {
+        int maxNum = 1 << 30;
+        n |= n >>> 1;
+        n |= n >>> 2;
+        n |= n >>> 4;
+        n |= n >>> 8;
+        n |= n >>> 16;
+        n = (n < 0) ? 1 : (n >= maxNum) ? maxNum : n + 1;
+        return n >>> 1 == 0 ? n : n >>> 1;
+    }
 
     /**
-     * 调试专用
+     * 加载缩放bitmap。
+     * 根据期望宽高自动获取合适的缩放比例, 具体看{@link #evaluateWH(float, float, float, float)}
+     *
+     * @param path      图片路径
+     * @param maxWidth  期望宽度
+     * @param maxHeight 期望高度
      */
-    public void showwwww(){
-        Log.e(TAG,"音频总地址daixoa:"+data.getAudioPathArr().size());
-        for(int i=0;i<musicName.size();i++){
-            Log.e(TAG,"音频单独地址"+musicName.get(i));
+    public static Bitmap loadScaledBitmap(String path, int maxWidth, int maxHeight) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(path, options);
+        int srcHeight = options.outHeight;
+        int srcWidth = options.outWidth;
+        // decode失败
+        if (srcHeight == -1 || srcWidth == -1) {
+            return null;
         }
-        Log.e(TAG,"音频总地址"+data.getAudioPathArr());
+
+        // 当比例差距过大时，先通过inSampleSize加载bitmap降低内存消耗
+        float scale = getScale(srcWidth, srcHeight, maxWidth, maxHeight);
+        int evaluateWH = evaluateWH(srcWidth, srcHeight, maxWidth, maxHeight);
+        //options.inSampleSize = inSampleSizeFor((int) (1 / scale));
+        options.inJustDecodeBounds = false;
+        if (evaluateWH == 0) {
+            options.inScaled = true;
+            options.inDensity = srcWidth;
+            options.inTargetDensity = maxWidth * options.inSampleSize;
+        } else if (evaluateWH == 1) {
+            options.inScaled = true;
+            options.inDensity = srcHeight;
+            options.inTargetDensity = maxHeight * options.inSampleSize;
+        } else {
+            options.inScaled = false;
+        }
+        return BitmapFactory.decodeFile(path, options);
     }
 }

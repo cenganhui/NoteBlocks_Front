@@ -1,19 +1,11 @@
 package geishaproject.demonote.module.audio;
 
 import android.Manifest;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaPlayer;
 import android.text.SpannableString;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
-
 import java.io.IOException;
-
-import geishaproject.demonote.R;
-import geishaproject.demonote.activity.NewNote;
 import geishaproject.demonote.module.audio.manager.AudioRecordButton;
 import geishaproject.demonote.module.permission.PermissionHelper;
 import geishaproject.demonote.module.richtext.RichText;
@@ -59,17 +51,8 @@ public class Audio {
      * 添加录音点击事件监听
      */
     public  static  void addAudioListener() {
-        Components.PlayRecord.setOnClickListener(new View.OnClickListener() {        //播放录音点击事件
-            @Override
-            public void onClick(View v) {
-                Audio.PlayR();
-            }
-        });
 
         Components.mEmTvBtn.setHasRecordPromission(false);
-//        //授权处理
-//        Components.mHelper = new PermissionHelper(this);
-
         Components.mHelper.requestPermissions("请授予[录音]、[读写]权限，否则无法录音",
                 new PermissionHelper.PermissionListener() {
                     @Override
@@ -85,17 +68,13 @@ public class Audio {
                                 recordModel.setPlayed(false);
                                 Components.mRecords = recordModel;
                                 String newAudioPath =Components.data.getAudioPath()+Components.mRecords.getPath()+"?";
-                                Components.mPhotoTool.saverecordadress(Components.mRecords.getPath());
+                                //路径存入data中
+                                Components.data.addAudioPathArr(Components.mRecords.getPath());
                                 //输出录音小标识到文本***********
-                                Bitmap bitmap= BitmapFactory.decodeResource(PublicContext.getContext().getResources(), R.drawable.record);
-                                //Log.e(TAG,"addAudioListener :"+mRecords.getPath() );
-                                SpannableString spannableString = RichText.GetRecordSpannableString(1, Components.mRecords.getPath());
+                                SpannableString spannableString = RichText.GetRecordSpannableString(Components.data.getAudioPathSize()-1, Components.data.getAudioPathArr(Components.data.getAudioPathSize()-1));
                                 Components.ed_content.append(spannableString);
-                                //拼接的路径重新存入data中
-                                Components.data.setAudioPath(newAudioPath);
-                                Components.data.cutAudioPathArr();
-                                Toast.makeText(PublicContext.getContext(), newAudioPath, Toast.LENGTH_SHORT).show();
-                                //Toast.makeText(NewNote.this, "录音保存成功！时长："+mRecords.getSecond()+"s", Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(PublicContext.getContext(), newAudioPath, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(PublicContext.getContext(), "录音保存成功！时长："+Components.mRecords.getSecond()+"s", Toast.LENGTH_SHORT).show();
                             }
                         });
                     }

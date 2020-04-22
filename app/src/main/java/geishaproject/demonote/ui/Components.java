@@ -6,10 +6,7 @@ import android.net.Uri;
 import android.support.design.widget.FloatingActionButton;
 import android.widget.Button;
 import android.widget.EditText;
-
-import java.io.File;
 import java.util.Random;
-
 import geishaproject.demonote.model.Data;
 import geishaproject.demonote.module.audio.Record;
 import geishaproject.demonote.module.audio.manager.AudioRecordButton;
@@ -40,4 +37,20 @@ public class    Components {
     public static Random rand = new Random();
     public static int times = rand.nextInt(10000);//闹钟唯一标识
 
+    /* 注册界面 */
+    public static EditText user_name;
+    public static EditText user_passwd;
+    public static Button btn_register;
+
+    /* 登陆界面 */
+    public static EditText login_user_name;
+    public static EditText login_user_passwd;
+    public static Button btn_login;
+
+    /* 标识 */
+    public static final int UPDATE_TEXT = 1;//handler更新数据标识
+    public static final int MAKE_TOAST = 2; //handler弹窗标识
+    public static final int BACKUP_NOTES = 101;//回调更新数据标识
+    public static final int DOWNLOAD_FILE = 102; //回调恢复数据标识
+    public static final int SHARE_NOTE = 103; //回调分享标识
 }

@@ -3,10 +3,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import java.util.ArrayList;
 import java.util.Collections;
-
 import geishaproject.demonote.module.listview.MyOpenHelper;
 import geishaproject.demonote.utils.PublicContext;
 import geishaproject.demonote.model.Data;
+
 public class MyDatabase {
     private static MyOpenHelper myOpenHelper = new MyOpenHelper(PublicContext.getContext());
     //数据库配置信息

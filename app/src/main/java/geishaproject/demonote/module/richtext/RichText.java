@@ -2,15 +2,14 @@ package geishaproject.demonote.module.richtext;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
@@ -20,9 +19,8 @@ import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
-
 import java.io.IOException;
-
+import java.util.ArrayList;
 import geishaproject.demonote.R;
 import geishaproject.demonote.ui.Components;
 import geishaproject.demonote.utils.PublicContext;
@@ -42,6 +40,7 @@ public class RichText {
         Log.e(TAG,"大小为（m）："+bitmap.getByteCount() / 1024 / 1024+"宽度为" + bitmap.getWidth() + "高度为" + bitmap.getHeight());
         ImageSpan imgSpan = new ImageSpan(PublicContext.getContext(),bitmap, DynamicDrawableSpan.ALIGN_BASELINE);
         spannableString.setSpan(imgSpan, 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
         return spannableString;
     }
     /**
@@ -49,13 +48,11 @@ public class RichText {
      */
     public static SpannableString GetRecordSpannableString(int i, String specialchar){
         SpannableString spannableString = new SpannableString(specialchar);
-        /* Bitmap bitmap= BitmapFactory.decodeResource(PublicContext.getContext().getResources(),R.drawable.record);
-        bitmap = imageScale(bitmap,110 ,60);
-        ImageSpan imgSpan = new ImageSpan(PublicContext.getContext(),bitmap, DynamicDrawableSpan.ALIGN_BASELINE);*/
         MyIm imageSpan=new MyIm(PublicContext.getContext(), R.drawable.record);
         spannableString.setSpan(imageSpan, 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         Components.ed_content.setMovementMethod(LinkMovementMethod.getInstance());
         spannableString.setSpan(new TextClick(i),0,spannableString.length() , Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
         return spannableString;
     }
 
@@ -71,94 +68,48 @@ public class RichText {
 
             @Override
             public void onGlobalLayout() {
+                // TODO Auto-generated method stub
+                Components.ed_content.getViewTreeObserver().removeGlobalOnLayoutListener(this);
 
-                Components.ed_content.getViewTreeObserver().removeGlobalOnLayoutListener(this);         //移除回调函数
+                SpannableStringBuilder contentSpanBuilder  = new SpannableStringBuilder(Components.data.getContent());
+                Components.data.cutAudioPathArr();
+                Components.data.cutPicturePath();
+                ArrayList<String> audioArr = Components.data.getAudioPathArr();
+                ArrayList<String> pictureArr = Components.data.getPicturePathArr();
 
+                //contentSpanBuilder没有index方法定位，而replace需要startIndex和endIndex定位替换，因此使用镜像String定位
+                String flagString = Components.data.getContent();
 
-                Components.mPhotoTool.addsize(Components.ed_content.getWidth(), Components.ed_content.getHeight());  //记录宽高
+                //音频替换
+                for(int i=0;i<audioArr.size();i++){
+                    Log.d("audioReplace:",audioArr.get(i));
+                    //构建参数
+                    int audioPathSize = audioArr.get(i).length();                  //音频地址长度
+                    int audioPathStartIndex = flagString.indexOf(audioArr.get(i)); //起始位置
+                    SpannableString audioSpan =  GetRecordSpannableString(i,audioArr.get(i));     //构建Span
 
-                String world = Components.data.getContent();
-                String now = world;         //还有的文本
+                    //替换指定位置的文本为Span
+                    contentSpanBuilder.replace(audioPathStartIndex,audioPathStartIndex+audioPathSize,audioSpan);   //替换
+                }
 
+                //图片替换
+                for(int j=0;j<pictureArr.size();j++){
+                    Log.d("pictureReplace:",pictureArr.get(j));
+                    //构建参数
+                    int picturePathSize = pictureArr.get(j).length();                  //图片地址长度
+                    int picturePathStartIndex = flagString.indexOf(pictureArr.get(j)); //起始位置
+                    Bitmap bitmap =Components.mPhotoTool.getBitmapForAdress(pictureArr.get(j));         //获取位图
+                    SpannableString pictureSpan = GetSpannableString(bitmap, pictureArr.get(j));        //构建Span
 
-                //全部文本
-                int startindex=0;      //要替换图片的位置
-                int endindex=0;        //要替换图片的位置
-                int i=0,pi=0,ri=0;               //变量
-                Bitmap bitmap= null;
-
-                Log.d(TAG,"photo size ;:"+ Components.mPhotoTool.BitmapAdressSize());
-                Log.d(TAG,"record size ;:"+ Components.mPhotoTool.RecordAdressSize());
-                Log.d(TAG," size ;:"+ now.indexOf("amr")+"   "+now.indexOf("jpg"));
-
-                Log.d(TAG,"ed text ;:"+ Components.mPhotoTool.BitmapAdressSize());
-
-
-
-                //替换掉图片部分
-                if (Components.mPhotoTool.BitmapAdressSize() + Components.mPhotoTool.RecordAdressSize()>0){
-                    for (i=0; i<Components.mPhotoTool.BitmapAdressSize() + Components.mPhotoTool.RecordAdressSize();i++) {
-
-                        //数据定义
-                        //Log.d(TAG, "要切的文本" + mPhotoTool.GetBitmapNmae(i));
-                        String show;        //要放上去的文本
-                        //找到要替换的特殊字符位置
-                        if(now.indexOf("amr") == -1){
-                            endindex = now.indexOf(Components.mPhotoTool.GetBitmapNmae(pi));
-                            //切割子文本
-                            show = now.substring(0, endindex);
-                            now = now.substring(endindex + Components.mPhotoTool.GetBitmapNmae(pi).length());
-                            //输出文本
-                            Components.ed_content.append(show);
-                            //输出图片，GetSpannableString 富文本操作
-                            bitmap =Components. mPhotoTool.getBitmapForAdress(Components.mPhotoTool.GetBitmapNmae(pi));
-                            SpannableString spannableString = GetSpannableString(bitmap, Components.mPhotoTool.GetBitmapNmae(pi));
-                            Components.ed_content.append(spannableString);
-                            pi++;
-                        }else if(now.indexOf("jpg") == -1){
-                            endindex = now.indexOf(Components.mPhotoTool.GetRecordNmae(ri));
-                            //切割子文本
-                            show = now.substring(0, endindex);
-                            now = now.substring(endindex + Components.mPhotoTool.GetRecordNmae(ri).length());
-                            //输出文本
-                            Components.ed_content.append(show);
-                            //输出录音小标识到文本***********
-                            SpannableString spannableString = GetRecordSpannableString(ri,Components.mPhotoTool.GetRecordNmae(ri));
-                            Components.ed_content.append(spannableString);
-                            ri++;
-                        }else
-                        if (now.indexOf("amr")<now.indexOf("jpg")  ){
-                            Log.d(TAG," adress ;:"+ Components.mPhotoTool.GetRecordNmae(ri));
-                            endindex = now.indexOf(Components.mPhotoTool.GetRecordNmae(ri));
-                            show = now.substring(0, endindex);
-                            now = now.substring(endindex + Components.mPhotoTool.GetRecordNmae(ri).length());
-                            Components.ed_content.append(show);
-                            SpannableString spannableString =  GetRecordSpannableString(ri,Components.mPhotoTool.GetRecordNmae(ri));
-                            Components.ed_content.append(spannableString);
-                            ri++;
-                        }else{
-                            endindex = now.indexOf(Components.mPhotoTool.GetBitmapNmae(pi));
-                            show = now.substring(0, endindex);
-                            now = now.substring(endindex + Components.mPhotoTool.GetBitmapNmae(pi).length());
-                            Components.ed_content.append(show);
-                            bitmap =Components. mPhotoTool.getBitmapForAdress(Components.mPhotoTool.GetBitmapNmae(pi));
-                            SpannableString spannableString = GetSpannableString(bitmap, Components.mPhotoTool.GetBitmapNmae(pi));
-                            Components.ed_content.append(spannableString);
-                            pi++;
-                        }
-
-                    }
-                    if(i == Components.mPhotoTool.BitmapAdressSize() + Components.mPhotoTool.RecordAdressSize())
-                        Components.ed_content.append(now);
-                } else
-                    Components.ed_content.setText(Components.data.getContent());
-
+                    //替换指定位置的文本为Span
+                    contentSpanBuilder.replace(picturePathStartIndex,picturePathStartIndex+picturePathSize,pictureSpan);
+                }
+                //将SpanBuilder放入
+                Components.ed_content.setText(contentSpanBuilder);
             }
-
         });
 
     }
-
     /**
      * 音频点击事件类
      */
@@ -171,12 +122,11 @@ public class RichText {
         @Override
         public void onClick(View widget) {
             //在此处理点击事件
-            if (Components.mPhotoTool.RecordAdressSize() != 0) {
+            if (Components.data.getAudioPathSize() != 0) {
                 player.reset();
                 try {
-                    //Toast.makeText(New_note.this, data.getAudioPath(), Toast.LENGTH_SHORT).show();
-                    Log.d("拿到音频地址",Components.mPhotoTool.GetRecordNmae(i));
-                    player.setDataSource(Components.mPhotoTool.GetRecordNmae(i)); //获取录音文件
+                    Log.d("拿到音频地址",Components.data.getAudioPathArr(i));
+                    player.setDataSource(Components.data.getAudioPathArr(i)); //获取录音文件
                     player.prepare();
                     player.start();
                 } catch (IOException e) {
@@ -187,8 +137,7 @@ public class RichText {
         }
         @Override
         public void updateDrawState(TextPaint ds) {
-//            ds.setColor(ds.linkColor);
-//            ds.setUnderlineText(true);
+
         }
     }
 

@@ -3,9 +3,8 @@
     <item android:state_pressed="true">
         <shape xmlns:android="http://schemas.android.com/apk/res/android"
             android:shape="rectangle">
-            <corners android:radius="10dp" />
-
-            <solid android:color="#d28eda"
+            <corners android:radius="28dp" />
+            <solid android:color="@color/colorJabinGreen"
                 />
 
         </shape>
@@ -13,8 +12,8 @@
     <item>
         <shape xmlns:android="http://schemas.android.com/apk/res/android"
             android:shape="rectangle">
-            <corners android:radius="10dp" />
-            <solid android:color="#d28eda" />
+            <corners android:radius="28dp" />
+            <solid android:color="@color/colorJabinGreen" />
         </shape>
     </item>
 </selector>

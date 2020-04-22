@@ -19,6 +19,23 @@
         android:background="#f5f5f5"
         >
 
+        <Button
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:background="@drawable/titlebar_menu_selector"
+            android:id="@+id/title_bar_left_menu"
+            android:layout_gravity="left|center_vertical"
+            android:layout_marginLeft="10dp"
+            />
+
+        <Button
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:background="@drawable/titlebar_menu_selector"
+            android:id="@+id/title_bar_right_menu"
+            android:layout_gravity="right|center_vertical"
+            android:layout_marginRight="10dp"/>
+
 
         <ListView
             android:id="@+id/layout_listview"

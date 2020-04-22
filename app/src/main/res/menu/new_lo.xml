@@ -10,14 +10,6 @@
 
         />
     <item
-
-        android:id="@+id/add_Photo"
-
-        android:title="添加照片"
-
-        />
-
-    <item
         android:id="@+id/add_clock"
 
         android:title="添加闹钟"

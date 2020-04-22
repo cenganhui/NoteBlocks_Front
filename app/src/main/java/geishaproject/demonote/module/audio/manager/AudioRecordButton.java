@@ -2,7 +2,6 @@ package geishaproject.demonote.module.audio.manager;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
@@ -10,8 +9,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-
-import geishaproject.demonote.R;
 import geishaproject.demonote.utils.FileUtils;
 
 /**
@@ -341,27 +338,19 @@ public class AudioRecordButton extends android.support.v7.widget.AppCompatButton
             mCurrentState = state;
             switch (mCurrentState) {
                 case STATE_NORMAL:
-                    setText(mContext.getString(R.string.long_click_record));//长按录音
                     break;
                 case STATE_RECORDING:
-                    setBackgroundColor(Color.rgb(0xcd, 0xcd, 0xcd));
-                    setText(R.string.hang_up_finsh);//松开结束
-                    setTextColor(Color.WHITE);
                     if (isRecording) {
-                        // 复写dialog.recording();
                         mDialogManager.recording();
                     }
                     break;
 
                 case STATE_WANT_TO_CANCEL:
-                    setText(R.string.release_cancel);//松开取消
-                    // dialog want to cancel
                     mDialogManager.wantToCancel();
                     break;
 
             }
         }
-
     }
 
     @Override

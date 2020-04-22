@@ -2,7 +2,6 @@ package geishaproject.demonote.module.audio.manager;
 
 import android.media.MediaRecorder;
 import android.util.Log;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
