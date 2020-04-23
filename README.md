@@ -1,5 +1,7 @@
-# NoteBlocks_2
+# NoteBlocks_Front
 ### 一个集成记录文字、图片、音频和提醒功能与一身的便签软件。
+
+[NoteBlocks_Server](https://github.com/cenganhui/NodeBlocks_Server)
 
 ## 主要功能
 - 实现了文字、图片和音频的交杂显示与存储
@@ -32,7 +34,7 @@
 ## 导出和导入
 #### 把当前便签导出到本地->将当前便签删除->选择导入->选择指定文件->将便签导入
 ![导出便签](image/daochu.png "导出便签")
-![删除便签](image/chanchu.png "删除便签")
+![删除便签](image/shanchu.png "删除便签")
 ![选择文件](image/daoru1.png "选择文件")
 ![导入便签](image/daoru2.png "导入便签")
 
