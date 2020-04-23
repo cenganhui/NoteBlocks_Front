@@ -10,7 +10,7 @@
 - 实现了云备份和云恢复功能
 
 ## 主页面
-![主页面](image/2.png "主页面")
+![主页面](https://github.com/cenganhui/NodeBlocks_Front/raw/master/image/2.png "主页面")
 
 ## 便签页面
 ![便签页面](image/1.png "便签页面")
