@@ -1,7 +1,7 @@
 package geishaproject.demonote.module.http;
 
 public class ServerInfo {
-    public static String domain="scnu.geishaproject.top";
-    public static String port="8080";
-    public static String ip = "47.112.16.171";
+    public static String domain="akumacgh.cn";
+    public static String port="8203";
+    public static String ip = "47.115.148.227";
 }
